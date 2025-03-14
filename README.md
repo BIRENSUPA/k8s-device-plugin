@@ -1,36 +1,48 @@
 # Biren GPU Device plugin
 
-![GitHub License](https://img.shields.io/github/license/BirenTechnology/k8s-device-plugin) ![GitHub Release](https://img.shields.io/github/v/release/BirenTechnology/k8s-device-plugin) [![Publish Docker image](https://github.com/BirenTechnology/k8s-device-plugin/actions/workflows/container.yaml/badge.svg)](https://github.com/BirenTechnology/k8s-device-plugin/actions/workflows/container.yaml)
-
 ## About
+
 The Biren GPU device plugin is as Daemonset that allows you to automatically:
 
- 1. Expose the number of GPUs on each nodes for you cluster
- 2. Keep track of the health of your GPUs
- 3. Run GPU enabled containers in your k8s cluster
+1.  Expose the number of GPUs on each nodes for you cluster
+2.  Keep track of the health of your GPUs
+3.  Run GPU enabled containers in your k8s cluster
 
 This repository contains Biren's official implementation of the [k8s device plugin](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/resource-management/device-plugin.md)
+
 ## Prerequisites
+
 The list of prerequisites for running the Biren device plugin is described below:
- 1. Biren GPU Driver >= 1.2.2
- 2. Kubernetes >=1.13
- 3. if need mount dri device, need run `modprobe -v vgem` in host which have gpus
+
+1.  Biren GPU Driver >= 1.2.2
+2.  Kubernetes >=1.13
+3.  if need mount dri device, need run `modprobe -v vgem` in host which have gpus
 
 ## SVI in Device plugin
+
 1. SVI devices will not be created dynamically anywhere within the k8s software stack (GPU must be configured into svi card and split into svi devices priori)
 
-
 ## SR-IOV in device plugin
+
 1. setup SR-IOV vfio driver
 2. run device plugin with --container-runtime kata
 
-
 ## Quick Start
-### Deploy
-`kubectl create -f deploy/biren-device-plugin.yaml`
-### Running GPU Pods
+
+### Build Image
+
 ```
-$ cat <<EOF | kubectl apply -f 
+make image-build
+```
+
+### Deploy
+
+`kubectl create -f deploy/biren-device-plugin.yaml`
+
+### Running GPU Pods
+
+```
+$ cat <<EOF | kubectl apply -f
 apiVersion: v1
 kind: Pod
 metadata:
@@ -48,8 +60,8 @@ spec:
 EOF
 ```
 
-
 ## Command
+
 ```
 Biren gpu device plugin
 
@@ -65,8 +77,9 @@ Flags:
       --pulse int                  heart beating every seconds
 ```
 
-## How to use it 
-requests 
+## How to use it
+
+requests
 `birentech.com/gpu: num`
 `birentech.com/1-4-gpu: num`
 `birentech.com/1-2-gpu: num`
@@ -103,13 +116,13 @@ Add the startup command parameter `--cdi-feature` to enable the CDI feature. If 
 k8s-device-plugin startup command example:
 
 ```yaml
-        command: 
-        - "/root/k8s-device-plugin"
-        args: 
-        - "--pulse" 
-        - "300"
-        - "--container-runtime"
-        - "runc"
-        - "--cdi-feature" # enable cdi feature
-        - "--overwrite-cdi-config" # overwrite cdi config
+command:
+  - "/root/k8s-device-plugin"
+args:
+  - "--pulse"
+  - "300"
+  - "--container-runtime"
+  - "runc"
+  - "--cdi-feature" # enable cdi feature
+  - "--overwrite-cdi-config" # overwrite cdi config
 ```

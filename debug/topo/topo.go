@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/BirenTechnology/go-brml/brml"
-	"github.com/BirenTechnology/k8s-device-plugin/pkg/brgpu"
+	"gitee.com/BirenTechnology/go-brml/brml"
+	"gitee.com/BirenTechnology/k8s-device-plugin/pkg/brgpu"
 	log "github.com/sirupsen/logrus"
 )
 

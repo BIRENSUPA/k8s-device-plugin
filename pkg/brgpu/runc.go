@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BirenTechnology/go-brml/brml"
+	"gitee.com/BirenTechnology/go-brml/brml"
 	"github.com/kubevirt/device-plugin-manager/pkg/dpm"
 	log "github.com/sirupsen/logrus"
 )

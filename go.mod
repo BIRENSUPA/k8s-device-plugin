@@ -1,9 +1,9 @@
-module github.com/BirenTechnology/k8s-device-plugin
+module gitee.com/BirenTechnology/k8s-device-plugin
 
 go 1.16
 
 require (
-	github.com/BirenTechnology/go-brml v0.0.0-20240612073547-7d6adadc1c0b
+	gitee.com/BirenTechnology/go-brml v0.0.0-20250314082319-8998101c6789
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/kubevirt/device-plugin-manager v1.19.4
 	github.com/onsi/ginkgo v1.16.5 // indirect

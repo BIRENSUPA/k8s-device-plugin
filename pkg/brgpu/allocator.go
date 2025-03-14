@@ -18,8 +18,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/BirenTechnology/go-brml/brml"
-	"github.com/BirenTechnology/k8s-device-plugin/pkg/utils"
+	"gitee.com/BirenTechnology/go-brml/brml"
+	"gitee.com/BirenTechnology/k8s-device-plugin/pkg/utils"
 )
 
 func Device2Graph(devices []string) (*utils.Graph, error) {

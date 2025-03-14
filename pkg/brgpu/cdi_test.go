@@ -16,7 +16,7 @@ package brgpu
 import (
 	"testing"
 
-	"github.com/BirenTechnology/go-brml/brml"
+	"gitee.com/BirenTechnology/go-brml/brml"
 	log "github.com/sirupsen/logrus"
 )
 
