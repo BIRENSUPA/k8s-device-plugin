@@ -62,15 +62,16 @@ func uintPtr(c uint32) *uint {
 }
 
 type Plugin struct {
-	PFDevices      PFDeviceInfoList
-	BRGPUs         DevicesInfoList
-	Runtime        string
-	Heartbeat      chan bool
-	resourceName   string
-	MountAllDevice bool
-	MountDriDevice bool
-	MountHostPath  bool
-	TopoGraph      *utils.Graph
+	ResourceLastName string
+	PFDevices        PFDeviceInfoList
+	BRGPUs           DevicesInfoList
+	Runtime          string
+	Heartbeat        chan bool
+	resourceName     string
+	MountAllDevice   bool
+	MountDriDevice   bool
+	MountHostPath    bool
+	TopoGraph        *utils.Graph
 }
 
 func (p *Plugin) gpuExist(id string) (bool, error) {
@@ -159,57 +160,83 @@ func (d *Plugin) GetNumaNode(idx int) (bool, int, error) {
 }
 
 func (p *Plugin) ListAndWatch(e *pluginapi.Empty, s pluginapi.DevicePlugin_ListAndWatchServer) error {
-	devs := []*pluginapi.Device{}
-	if p.Runtime == string(RuntimeRunc) {
-		devIDs := []string{}
-		for _, v := range p.BRGPUs {
-			for _, ins := range v.Instances {
-				dev := &pluginapi.Device{
-					ID:     ins.CardID,
-					Health: pluginapi.Healthy,
-				}
-
-				hasNum, numa, err := p.GetNumaNode(v.PhysicalNum)
-				if err != nil {
-					log.Errorf("get numa node %v err %v", v.PhysicalNum, err)
-				}
-
-				if hasNum {
-					log.Infof("dev %v topology numa %v", v.PhysicalNum, numa)
-					dev.Topology = &pluginapi.TopologyInfo{
-						Nodes: []*pluginapi.NUMANode{
-							{
-								ID: int64(numa),
-							},
-						},
+	reload := func() {
+		devs := []*pluginapi.Device{}
+		if p.Runtime == string(RuntimeRunc) {
+			devIDs := []string{}
+			for _, v := range p.BRGPUs {
+				for _, ins := range v.Instances {
+					dev := &pluginapi.Device{
+						ID:     ins.CardID,
+						Health: pluginapi.Healthy,
 					}
+
+					hasNum, numa, err := p.GetNumaNode(v.PhysicalNum)
+					if err != nil {
+						log.Errorf("get numa node %v err %v", v.PhysicalNum, err)
+					}
+
+					if hasNum {
+						log.Infof("dev %v topology numa %v", v.PhysicalNum, numa)
+						dev.Topology = &pluginapi.TopologyInfo{
+							Nodes: []*pluginapi.NUMANode{
+								{
+									ID: int64(numa),
+								},
+							},
+						}
+					}
+					devs = append(devs, dev)
+					devIDs = append(devIDs, ins.CardID)
 				}
-				devs = append(devs, dev)
-				devIDs = append(devIDs, ins.CardID)
-			}
 
+			}
+			tg, err := Device2Graph(devIDs)
+			if err != nil {
+				log.Errorf("Generate gpu %v topo error %v", devIDs, err)
+			} else {
+				p.TopoGraph = tg
+			}
 		}
-		tg, err := Device2Graph(devIDs)
-		if err != nil {
-			log.Errorf("Generate gpu %v topo error %v", devIDs, err)
-		}
-		p.TopoGraph = tg
-	}
-	if p.Runtime == string(RuntimeKata) {
-		for _, v := range p.PFDevices {
-			for _, vf := range v.VFs {
-				dev := &pluginapi.Device{
-					ID:     vf.deviceEndpoint(),
-					Health: pluginapi.Healthy,
+		if p.Runtime == string(RuntimeKata) {
+			for _, v := range p.PFDevices {
+				for _, vf := range v.VFs {
+					dev := &pluginapi.Device{
+						ID:     vf.deviceEndpoint(),
+						Health: pluginapi.Healthy,
+					}
+					devs = append(devs, dev)
 				}
-				devs = append(devs, dev)
 			}
 		}
+		s.Send(&pluginapi.ListAndWatchResponse{Devices: devs})
 	}
-
-	s.Send(&pluginapi.ListAndWatchResponse{Devices: devs})
-
-	select {}
+	// reload at first start
+	reload()
+	for range p.Heartbeat {
+		log.Info("heartbeat signal received...")
+		if p.Runtime == string(RuntimeRunc) {
+			info, err := DeviceDiscover()
+			if err != nil {
+				log.Errorf("DeviceDiscover failed %v", err)
+				continue
+			} else {
+				p.BRGPUs = info.FilterByName(p.ResourceLastName)
+				log.Infof("BRGPUS info reloaded")
+			}
+		} else if p.Runtime == string(RuntimeKata) {
+			info, err := vfDeviceDiscover()
+			if err != nil {
+				log.Errorf("vfDeviceDiscover failed %v", err)
+				continue
+			} else {
+				p.PFDevices = info.FilterByName(p.ResourceLastName)
+				log.Infof("PFDevices info reloaded")
+			}
+		}
+		reload()
+	}
+	return nil
 }
 
 func (p *Plugin) Allocate(ctx context.Context, r *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {

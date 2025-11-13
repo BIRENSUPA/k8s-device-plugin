@@ -120,8 +120,44 @@ func (bgm *brGPUManager) runcManager(pulse int, mountAllDev bool, mountDriDevice
 				}
 				l.Heartbeat <- true
 			}
+
 		}()
 	}
+
+	go func() {
+		cardsCnt := 0
+		for {
+			time.Sleep(time.Second * 30)
+			cardFiles, err := os.ReadDir("/dev/biren")
+			if err != nil {
+				if os.IsNotExist(err) {
+					log.Errorf("dir /dev/biren not exists, stop biren gpu manager...")
+					bgm.Stop <- true
+				}
+				log.Errorf("read /dev/biren failed %v", err)
+				continue
+			}
+			newCnt := 0
+			for _, f := range cardFiles {
+				if !f.IsDir() {
+					newCnt += 1
+				}
+			}
+			if newCnt < 1 || newCnt != cardsCnt {
+				log.Errorf("/dev/biren card cnt  %v -> %v, reloading brml", cardsCnt, newCnt)
+				brml.Shutdown()
+				if err := brml.Init(); err != nil {
+					log.Errorf("brml init failed %v", err)
+					bgm.Stop <- true
+				}
+				cardsCnt = newCnt
+				log.Infof("brml reload ok, send heartbeat!")
+				l.Heartbeat <- true
+			}
+
+		}
+
+	}()
 
 	go func() {
 		var path = "/sys/class/biren"

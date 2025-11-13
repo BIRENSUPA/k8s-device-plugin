@@ -1,4 +1,4 @@
-REPO ?= ghcr.io/BirenTechnology
+REPO ?= ghcr.io/birentechnology
 PROJECT ?= k8s-device-plugin
 BUILD_ENV?=
 tag=$(shell git describe --abbrev=0 --tags)

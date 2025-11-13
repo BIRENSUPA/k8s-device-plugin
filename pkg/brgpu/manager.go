@@ -51,13 +51,14 @@ func (l *Lister) GetResourceNamespace() string {
 
 func (l *Lister) NewPlugin(resourceLastName string) dpm.PluginInterface {
 	return &Plugin{
-		Runtime:        l.Runtime,
-		PFDevices:      l.PFDeviceInfoList.FilterByName(resourceLastName),
-		BRGPUs:         l.DevicesInfoList.FilterByName(resourceLastName),
-		Heartbeat:      l.Heartbeat,
-		MountAllDevice: l.MountAllDevice,
-		MountDriDevice: l.MountDriDevice,
-		MountHostPath:  l.MountHostPath,
+		Runtime:          l.Runtime,
+		PFDevices:        l.PFDeviceInfoList.FilterByName(resourceLastName),
+		BRGPUs:           l.DevicesInfoList.FilterByName(resourceLastName),
+		Heartbeat:        l.Heartbeat,
+		MountAllDevice:   l.MountAllDevice,
+		MountDriDevice:   l.MountDriDevice,
+		MountHostPath:    l.MountHostPath,
+		ResourceLastName: resourceLastName,
 	}
 }
 func (l *Lister) Discover(pluginListCh chan dpm.PluginNameList) {
