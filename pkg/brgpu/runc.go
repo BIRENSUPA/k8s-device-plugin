@@ -125,7 +125,6 @@ func (bgm *brGPUManager) runcManager(pulse int, mountAllDev bool, mountDriDevice
 	}
 
 	go func() {
-		cardsCnt := 0
 		for {
 			time.Sleep(time.Second * 30)
 			cardFiles, err := os.ReadDir("/dev/biren")
@@ -137,26 +136,25 @@ func (bgm *brGPUManager) runcManager(pulse int, mountAllDev bool, mountDriDevice
 				log.Errorf("read /dev/biren failed %v", err)
 				continue
 			}
-			newCnt := 0
+			fileCnt := 0
 			for _, f := range cardFiles {
 				if !f.IsDir() {
-					newCnt += 1
+					fileCnt += 1
 				}
 			}
-			if newCnt < 1 || newCnt != cardsCnt {
-				log.Errorf("/dev/biren card cnt  %v -> %v, reloading brml", cardsCnt, newCnt)
+			curCnt, err := brml.DeviceCount()
+			if fileCnt < 1 || fileCnt != curCnt {
+				log.Errorf("/dev/biren card cnt  %v -> %v, reloading brml", curCnt, fileCnt)
 				brml.Shutdown()
 				if err := brml.Init(); err != nil {
 					log.Errorf("brml init failed %v", err)
 					bgm.Stop <- true
 				}
-				cardsCnt = newCnt
 				log.Infof("brml reload ok, send heartbeat!")
 				l.Heartbeat <- true
 			}
 
 		}
-
 	}()
 
 	go func() {
