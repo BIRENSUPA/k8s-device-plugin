@@ -21,8 +21,8 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/BirenTechnology/go-brml/brml"
-	"gitee.com/BirenTechnology/k8s-device-plugin/pkg/utils"
+	"github.com/BIRENSUPA/go-brml/brml"
+	"github.com/BIRENSUPA/k8s-device-plugin/pkg/utils"
 
 	log "github.com/sirupsen/logrus"
 	pluginapi "k8s.io/kubelet/pkg/apis/deviceplugin/v1beta1"

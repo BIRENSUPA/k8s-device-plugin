@@ -19,7 +19,7 @@ import (
 	"os"
 	"path"
 
-	"gitee.com/BirenTechnology/go-brml/brml"
+	"github.com/BIRENSUPA/go-brml/brml"
 	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/yaml"
 	cdi "tags.cncf.io/container-device-interface/specs-go"

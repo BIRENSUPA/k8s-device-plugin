@@ -19,7 +19,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gitee.com/BirenTechnology/k8s-device-plugin/pkg/brgpu"
+	"github.com/BIRENSUPA/k8s-device-plugin/pkg/brgpu"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

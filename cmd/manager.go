@@ -18,7 +18,7 @@ import (
 	"os"
 	"time"
 
-	"gitee.com/BirenTechnology/k8s-device-plugin/cmd/app"
+	"github.com/BIRENSUPA/k8s-device-plugin/cmd/app"
 	log "github.com/sirupsen/logrus"
 )
 
